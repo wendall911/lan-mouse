@@ -1,7 +1,7 @@
 [package]
 name = "input-capture"
 description = "cross-platform input-capture library used by lan-mouse"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 license = "GPL-3.0-or-later"
 repository = "https://github.com/feschber/lan-mouse"
@@ -10,10 +10,10 @@ repository = "https://github.com/feschber/lan-mouse"
 futures = "0.3.28"
 futures-core = "0.3.30"
 log = "0.4.22"
-input-event = { path = "../input-event", version = "0.2.1" }
+input-event = { path = "../input-event", version = "0.3.0" }
 memmap = "0.7"
 tempfile = "3.8"
-thiserror = "1.0.61"
+thiserror = "2.0.0"
 tokio = { version = "1.32.0", features = [
     "io-util",
     "io-std",
@@ -40,18 +40,18 @@ wayland-protocols-wlr = { version = "0.3.1", features = [
     "client",
 ], optional = true }
 x11 = { version = "2.21.0", features = ["xlib", "xtest"], optional = true }
-ashpd = { version = "0.9", default-features = false, features = [
+ashpd = { version = "0.10", default-features = false, features = [
     "tokio",
 ], optional = true }
-reis = { version = "0.2", features = ["tokio"], optional = true }
+reis = { version = "0.4", features = ["tokio"], optional = true }
 
 [target.'cfg(target_os="macos")'.dependencies]
-core-graphics = { version = "0.23", features = ["highsierra"] }
-core-foundation = "0.9.4"
+core-graphics = { version = "0.24.0", features = ["highsierra"] }
+core-foundation = "0.10.0"
 core-foundation-sys = "0.8.6"
 libc = "0.2.155"
 keycode = "0.4.0"
-bitflags = "2.5.0"
+bitflags = "2.6.0"
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.58.0", features = [
@@ -65,8 +65,8 @@ windows = { version = "0.58.0", features = [
 ] }
 
 [features]
-default = ["wayland", "x11", "libei"]
-wayland = [
+default = ["layer_shell", "x11", "libei"]
+layer_shell = [
     "dep:wayland-client",
     "dep:wayland-protocols",
     "dep:wayland-protocols-wlr",

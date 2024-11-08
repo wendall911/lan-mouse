@@ -12,7 +12,7 @@ members = [
 [package]
 name = "lan-mouse"
 description = "Software KVM Switch / mouse & keyboard sharing software for Local Area Networks"
-version = "0.9.1"
+version = "0.10.0"
 edition = "2021"
 license = "GPL-3.0-or-later"
 repository = "https://github.com/feschber/lan-mouse"
@@ -22,13 +22,13 @@ strip = true
 lto = "fat"
 
 [dependencies]
-input-event = { path = "input-event", version = "0.2.1" }
-input-emulation = { path = "input-emulation", version = "0.2.1", default-features = false }
-input-capture = { path = "input-capture", version = "0.2.0", default-features = false }
-lan-mouse-cli = { path = "lan-mouse-cli", version = "0.1.0" }
-lan-mouse-gtk = { path = "lan-mouse-gtk", version = "0.1.0", optional = true }
-lan-mouse-ipc = { path = "lan-mouse-ipc", version = "0.1.0" }
-lan-mouse-proto = { path = "lan-mouse-proto", version = "0.1.0" }
+input-event = { path = "input-event", version = "0.3.0" }
+input-emulation = { path = "input-emulation", version = "0.3.0", default-features = false }
+input-capture = { path = "input-capture", version = "0.3.0", default-features = false }
+lan-mouse-cli = { path = "lan-mouse-cli", version = "0.2.0" }
+lan-mouse-gtk = { path = "lan-mouse-gtk", version = "0.2.0", optional = true }
+lan-mouse-ipc = { path = "lan-mouse-ipc", version = "0.2.0" }
+lan-mouse-proto = { path = "lan-mouse-proto", version = "0.2.0" }
 
 hickory-resolver = "0.24.1"
 toml = "0.8"
@@ -49,7 +49,7 @@ tokio = { version = "1.32.0", features = [
 futures = "0.3.28"
 clap = { version = "4.4.11", features = ["derive"] }
 slab = "0.4.9"
-thiserror = "1.0.61"
+thiserror = "2.0.0"
 tokio-util = "0.7.11"
 local-channel = "0.1.5"
 
@@ -57,9 +57,21 @@ local-channel = "0.1.5"
 libc = "0.2.148"
 
 [features]
-default = ["wayland", "x11", "xdg_desktop_portal", "libei", "gtk"]
-wayland = ["input-capture/wayland", "input-emulation/wayland"]
-x11 = ["input-capture/x11", "input-emulation/x11"]
-xdg_desktop_portal = ["input-emulation/xdg_desktop_portal"]
-libei = ["input-event/libei", "input-capture/libei", "input-emulation/libei"]
+default = [
+    "gtk",
+    "layer_shell_capture",
+    "x11_capture",
+    "libei_capture",
+    "wlroots_emulation",
+    "libei_emulation",
+    "rdp_emulation",
+    "x11_emulation",
+]
 gtk = ["dep:lan-mouse-gtk"]
+layer_shell_capture = ["input-capture/layer_shell"]
+x11_capture = ["input-capture/x11"]
+libei_capture = ["input-event/libei", "input-capture/libei"]
+libei_emulation = ["input-event/libei", "input-emulation/libei"]
+wlroots_emulation = ["input-emulation/wlroots"]
+x11_emulation = ["input-emulation/x11"]
+rdp_emulation = ["input-emulation/remote_desktop_portal"]

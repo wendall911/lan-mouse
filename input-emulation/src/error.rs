@@ -6,53 +6,35 @@ pub enum InputEmulationError {
     Emulate(#[from] EmulationError),
 }
 
-#[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
+#[cfg(all(
+    unix,
+    any(feature = "remote_desktop_portal", feature = "libei"),
+    not(target_os = "macos")
+))]
 use ashpd::{desktop::ResponseError, Error::Response};
-#[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
-use reis::tokio::EiConvertEventStreamError;
 use std::io;
 use thiserror::Error;
 
-#[cfg(all(unix, feature = "wayland", not(target_os = "macos")))]
+#[cfg(all(unix, feature = "wlroots", not(target_os = "macos")))]
 use wayland_client::{
     backend::WaylandError,
     globals::{BindError, GlobalError},
     ConnectError, DispatchError,
 };
 
-#[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
-use reis::tokio::HandshakeError;
-
-#[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
-#[derive(Debug, Error)]
-#[error("error in libei stream: {inner:?}")]
-pub struct ReisConvertStreamError {
-    inner: EiConvertEventStreamError,
-}
-
-#[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
-impl From<EiConvertEventStreamError> for ReisConvertStreamError {
-    fn from(e: EiConvertEventStreamError) -> Self {
-        Self { inner: e }
-    }
-}
-
 #[derive(Debug, Error)]
 pub enum EmulationError {
     #[error("event stream closed")]
     EndOfStream,
     #[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
-    #[error("libei error flushing events: `{0}`")]
-    Libei(#[from] reis::event::Error),
-    #[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
-    #[error("")]
-    LibeiConvertStream(#[from] ReisConvertStreamError),
-    #[cfg(all(unix, feature = "wayland", not(target_os = "macos")))]
+    #[error("libei error: `{0}`")]
+    Libei(#[from] reis::Error),
+    #[cfg(all(unix, feature = "wlroots", not(target_os = "macos")))]
     #[error("wayland error: `{0}`")]
     Wayland(#[from] wayland_client::backend::WaylandError),
     #[cfg(all(
         unix,
-        any(feature = "xdg_desktop_portal", feature = "libei"),
+        any(feature = "remote_desktop_portal", feature = "libei"),
         not(target_os = "macos")
     ))]
     #[error("xdg-desktop-portal: `{0}`")]
@@ -63,13 +45,13 @@ pub enum EmulationError {
 
 #[derive(Debug, Error)]
 pub enum EmulationCreationError {
-    #[cfg(all(unix, feature = "wayland", not(target_os = "macos")))]
+    #[cfg(all(unix, feature = "wlroots", not(target_os = "macos")))]
     #[error("wlroots backend: `{0}`")]
     Wlroots(#[from] WlrootsEmulationCreationError),
     #[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
     #[error("libei backend: `{0}`")]
     Libei(#[from] LibeiEmulationCreationError),
-    #[cfg(all(unix, feature = "xdg_desktop_portal", not(target_os = "macos")))]
+    #[cfg(all(unix, feature = "remote_desktop_portal", not(target_os = "macos")))]
     #[error("xdg-desktop-portal: `{0}`")]
     Xdp(#[from] XdpEmulationCreationError),
     #[cfg(all(unix, feature = "x11", not(target_os = "macos")))]
@@ -97,7 +79,7 @@ impl EmulationCreationError {
         ) {
             return true;
         }
-        #[cfg(all(unix, feature = "xdg_desktop_portal", not(target_os = "macos")))]
+        #[cfg(all(unix, feature = "remote_desktop_portal", not(target_os = "macos")))]
         if matches!(
             self,
             EmulationCreationError::Xdp(XdpEmulationCreationError::Ashpd(Response(
@@ -110,7 +92,7 @@ impl EmulationCreationError {
     }
 }
 
-#[cfg(all(unix, feature = "wayland", not(target_os = "macos")))]
+#[cfg(all(unix, feature = "wlroots", not(target_os = "macos")))]
 #[derive(Debug, Error)]
 pub enum WlrootsEmulationCreationError {
     #[error(transparent)]
@@ -127,7 +109,7 @@ pub enum WlrootsEmulationCreationError {
     Io(#[from] std::io::Error),
 }
 
-#[cfg(all(unix, feature = "wayland", not(target_os = "macos")))]
+#[cfg(all(unix, feature = "wlroots", not(target_os = "macos")))]
 #[derive(Debug, Error)]
 #[error("wayland protocol \"{protocol}\" not supported: {inner}")]
 pub struct WaylandBindError {
@@ -135,7 +117,7 @@ pub struct WaylandBindError {
     protocol: &'static str,
 }
 
-#[cfg(all(unix, feature = "wayland", not(target_os = "macos")))]
+#[cfg(all(unix, feature = "wlroots", not(target_os = "macos")))]
 impl WaylandBindError {
     pub(crate) fn new(inner: BindError, protocol: &'static str) -> Self {
         Self { inner, protocol }
@@ -150,10 +132,10 @@ pub enum LibeiEmulationCreationError {
     #[error(transparent)]
     Io(#[from] std::io::Error),
     #[error(transparent)]
-    Handshake(#[from] HandshakeError),
+    Reis(#[from] reis::Error),
 }
 
-#[cfg(all(unix, feature = "xdg_desktop_portal", not(target_os = "macos")))]
+#[cfg(all(unix, feature = "remote_desktop_portal", not(target_os = "macos")))]
 #[derive(Debug, Error)]
 pub enum XdpEmulationCreationError {
     #[error(transparent)]

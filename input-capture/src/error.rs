@@ -8,9 +8,9 @@ pub enum InputCaptureError {
     Capture(#[from] CaptureError),
 }
 
-#[cfg(all(unix, feature = "wayland", not(target_os = "macos")))]
+#[cfg(all(unix, feature = "layer_shell", not(target_os = "macos")))]
 use std::io;
-#[cfg(all(unix, feature = "wayland", not(target_os = "macos")))]
+#[cfg(all(unix, feature = "layer_shell", not(target_os = "macos")))]
 use wayland_client::{
     backend::WaylandError,
     globals::{BindError, GlobalError},
@@ -19,25 +19,9 @@ use wayland_client::{
 
 #[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
 use ashpd::desktop::ResponseError;
-#[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
-use reis::tokio::{EiConvertEventStreamError, HandshakeError};
 
 #[cfg(target_os = "macos")]
 use core_graphics::base::CGError;
-
-#[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
-#[derive(Debug, Error)]
-#[error("error in libei stream: {inner:?}")]
-pub struct ReisConvertEventStreamError {
-    inner: EiConvertEventStreamError,
-}
-
-#[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
-impl From<EiConvertEventStreamError> for ReisConvertEventStreamError {
-    fn from(e: EiConvertEventStreamError) -> Self {
-        Self { inner: e }
-    }
-}
 
 #[derive(Debug, Error)]
 pub enum CaptureError {
@@ -48,11 +32,8 @@ pub enum CaptureError {
     #[error("io error: `{0}`")]
     Io(#[from] std::io::Error),
     #[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
-    #[error("error in libei stream: `{0}`")]
-    Reis(#[from] ReisConvertEventStreamError),
-    #[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
-    #[error("libei handshake failed: `{0}`")]
-    Handshake(#[from] HandshakeError),
+    #[error("libei error: `{0}`")]
+    Reis(#[from] reis::Error),
     #[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
     #[error(transparent)]
     Portal(#[from] ashpd::Error),
@@ -83,7 +64,7 @@ pub enum CaptureCreationError {
     #[cfg(all(unix, feature = "libei", not(target_os = "macos")))]
     #[error("error creating input-capture-portal backend: `{0}`")]
     Libei(#[from] LibeiCaptureCreationError),
-    #[cfg(all(unix, feature = "wayland", not(target_os = "macos")))]
+    #[cfg(all(unix, feature = "layer_shell", not(target_os = "macos")))]
     #[error("error creating layer-shell capture backend: `{0}`")]
     LayerShell(#[from] LayerShellCaptureCreationError),
     #[cfg(all(unix, feature = "x11", not(target_os = "macos")))]
@@ -121,7 +102,7 @@ pub enum LibeiCaptureCreationError {
     Ashpd(#[from] ashpd::Error),
 }
 
-#[cfg(all(unix, feature = "wayland", not(target_os = "macos")))]
+#[cfg(all(unix, feature = "layer_shell", not(target_os = "macos")))]
 #[derive(Debug, Error)]
 #[error("{protocol} protocol not supported: {inner}")]
 pub struct WaylandBindError {
@@ -129,14 +110,14 @@ pub struct WaylandBindError {
     protocol: &'static str,
 }
 
-#[cfg(all(unix, feature = "wayland", not(target_os = "macos")))]
+#[cfg(all(unix, feature = "layer_shell", not(target_os = "macos")))]
 impl WaylandBindError {
     pub(crate) fn new(inner: BindError, protocol: &'static str) -> Self {
         Self { inner, protocol }
     }
 }
 
-#[cfg(all(unix, feature = "wayland", not(target_os = "macos")))]
+#[cfg(all(unix, feature = "layer_shell", not(target_os = "macos")))]
 #[derive(Debug, Error)]
 pub enum LayerShellCaptureCreationError {
     #[error(transparent)]
